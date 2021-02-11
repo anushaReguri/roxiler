@@ -4,10 +4,12 @@ import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Card } from 'primereact/card';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 function ToDoList() {
 const [toDos, setToDos] = useState([])
 const [error, setError] = useState(null)
+const [loading, setLoading] = useState(true);
 const [state, setState] = useState({selectedUser:undefined, userToDos:[]})
 const [globalFilter, setGlobalFilter] = useState(null)
 const dt = useRef(null)
@@ -20,14 +22,17 @@ const dt = useRef(null)
     })
         todo.sort((a,b)=>{return a.id-b.id})
          setToDos(todo);
+         setLoading(false)
 })
        .catch(err=> setError(err.message)))
     }, [])
 
-    const getUser = (user) => {        
+    const getUser = (user) => {  
+        setLoading(true)      
         fetch('http://jsonplaceholder.typicode.com/users/'+user.userId).then(resp=> resp.json()
        .then(userData=> {
         setState({...state,selectedUser:{...userData,...user}, userToDos:toDos.filter(todo=> todo.userId===user.userId)})
+        setLoading(false)
        }    )
        .catch(err=> setError(err.message)))
     }
@@ -99,6 +104,7 @@ const dt = useRef(null)
 
   return (
       <>
+      {loading&&<ProgressSpinner/>}
       {error? <p>{error}</p>:
          <div className=''>
              <div className='d-flex'>
